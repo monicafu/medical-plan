@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/Service",
+  "definitions": {
+    "Service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "_org": {
+          "type": "string"
+        },
+        "objectId": {
+          "type": "string"
+        },
+        "objectType": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "objectId",
+        "objectType"
+      ],
+      "title": "Service"
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/Planservice",
+  "definitions": {
+    "Planservice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "linkedService": {
+          "$ref": "#/definitions/LinkedService"
+        },
+        "planserviceCostShares": {
+          "$ref": "#/definitions/PlanserviceCostShares"
+        },
+        "_org": {
+          "type": "string"
+        },
+        "objectId": {
+          "type": "string"
+        },
+        "objectType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "objectId",
+        "objectType"
+      ],
+      "title": "Welcome"
+    },
+    "LinkedService": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "_org": {
+          "type": "string"
+        },
+        "objectId": {
+          "type": "string"
+        },
+        "objectType": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "objectId",
+        "objectType"
+      ],
+      "title": "LinkedService"
+    },
+    "PlanserviceCostShares": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "deductible": {
+          "type": "integer"
+        },
+        "_org": {
+          "type": "string"
+        },
+        "copay": {
+          "type": "integer"
+        },
+        "objectId": {
+          "type": "string"
+        },
+        "objectType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "copay",
+        "deductible",
+        "objectId",
+        "objectType"
+      ],
+      "title": "PlanserviceCostShares"
+    }
+  }
+}

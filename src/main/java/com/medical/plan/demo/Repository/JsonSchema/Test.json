@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plan",
+  "type": "object",
+  "properties": {
+    "_org": {
+      "type": "string",
+      "description": "the origination that the plan belongs to."
+    },
+    "objectId": {
+      "type": "string",
+      "description": "The id uniquely identify the object."
+    },
+    "objectType": {
+      "type": "string",
+      "description": "The type of this the object."
+    },
+    "planType": {
+      "type": "string",
+      "description": "inNetwork or outNetwork"
+    },
+    "creationDate" :{
+      "type":"string",
+      "format": "date"
+    },
+    "planCostShare" :{
+      "$ref":"membercostshare_schema.json"
+    },
+    "linkedPlanServices": {
+      "type":"array",
+      "items" :{
+        "type":"object"
+      }
+    }
+  },
+  "required" :["_org","objectId","objectType","planType"]
+}
