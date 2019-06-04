@@ -1,4 +1,4 @@
-package com.medical.plan.demo.model;
+package com.medical.plan.demo.Tools;
 import java.security.SecureRandom;
 import java.util.Random;
 

@@ -1,6 +1,5 @@
 package com.medical.plan.demo.Repository.Impl;
 
-import com.medical.plan.demo.model.Plan;
 import com.medical.plan.demo.Repository.PlanRepository;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -11,32 +10,32 @@ import java.util.Map;
 @Repository
 public class PlanRepositoryImpl implements PlanRepository {
 
-    private RedisTemplate<String,Plan> redisTemplate;
+    private RedisTemplate<String,Map> redisTemplate;
     private HashOperations hashOperations;
 
-    public PlanRepositoryImpl(RedisTemplate<String,Plan> redisTemplate) {
+    public PlanRepositoryImpl(RedisTemplate<String,Map> redisTemplate) {
         this.redisTemplate = redisTemplate;
         hashOperations = redisTemplate.opsForHash();
     }
     @Override
-    public Map<String,Plan> findAll() {
+    public Map<String,Map> findAll() {
         return hashOperations.entries("PLAN");
     }
 
     @Override
-    public Plan findById(String id) {
-        return (Plan)hashOperations.get("PLAN",id);
+    public Map findById(String id) {
+        return (Map)hashOperations.get("PLAN",id);
 
     }
 
     @Override
-    public Plan save(Plan plan) {
-        hashOperations.put("PLAN",plan.getObjectId(),plan);
+    public Map save(Map plan) {
+        hashOperations.put("PLAN",plan.get("objectId"),plan);
         return plan;
     }
 
     @Override
-    public Plan update(Plan plan) {
+    public Map update(Map plan) {
         return save(plan);
     }
 

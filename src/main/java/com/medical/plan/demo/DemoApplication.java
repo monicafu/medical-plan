@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
 import javax.servlet.Filter;
+import java.util.Map;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -19,8 +20,8 @@ public class DemoApplication {
 	}
 
 	@Bean
-	RedisTemplate<String,Plan> redisPlanTemplate() {
-		RedisTemplate<String,Plan> redisTemplate = new RedisTemplate<>();
+	RedisTemplate<String,Map> redisPlanTemplate() {
+		RedisTemplate<String,Map> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(jedisConnectionFactory());
 		return redisTemplate;
 	}

@@ -1,17 +1,13 @@
 package com.medical.plan.demo.service;
 
-import com.medical.plan.demo.model.Plan;
-
 import java.util.Map;
 
 public interface PlanServices {
-    Map<String,Plan> findAll();
+    Map<String,Map> findAll();
 
-    Plan findById(String id);
+    Map findById(String id);
 
-    Plan save(Plan plan);
-
-    Plan update(Plan plan);
+    Map save(Map map);
 
     void remove(String id);
 }

@@ -1,11 +1,11 @@
 package com.medical.plan.demo.controller;
 
-import com.medical.plan.demo.Repository.JsonValidation;
-import com.medical.plan.demo.model.Plan;
-import com.medical.plan.demo.model.UUIDGenerator;
+import com.medical.plan.demo.Tools.Utils;
 import com.medical.plan.demo.service.PlanServices;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
 
@@ -15,50 +15,52 @@ import java.util.Map;
 public class PlanResource {
     @Autowired
     private PlanServices planServices;
-    private UUIDGenerator uuidGenerator;
-    private JsonValidation jsonValidation;
-
     public PlanResource(PlanServices planServices) {
         this.planServices = planServices;
     }
 
 
     @GetMapping("/all")
-    public Map<String,Plan> findAll() {
+    public Map<String,Map> findAll() {
         return planServices.findAll();
     }
 
     @GetMapping("/{id}")
-    public Plan findById(@PathVariable("id") String id) {
+    public Map findById(@PathVariable("id") String id) {
         return planServices.findById(id);
     }
 
     @PostMapping("/add")
-    public Plan add(@RequestBody Plan plan) {
-        String id = uuidGenerator.randomUUID(16);
-        plan.setObjectId(id);
-        //validate schema
-        String message = jsonValidation.validate("plan_schema",plan);
-        if (message.equals("success")){
-            return planServices.save(plan);
-        }
-        return plan;
-    }
+    public ModelAndView add(@RequestBody String planJson) {
 
-    @PutMapping("/add/{id}")
-    public Plan update(@PathVariable("id") String id, @RequestBody Plan plan) {
-        Plan item = planServices.findById(id);
-        item.setCreationDate(plan.getCreationDate());
-        item.set_org(plan.get_org());
-        item.setPlanType(plan.getPlanType());
-        item.setLinkedPlanServices(plan.getLinkedPlanServices());
-        item.setPlanCostShares(plan.getPlanCostShares());
-        return planServices.update(item);
+        //validate schema
+        Map plan = Utils.convertStrToMap(planJson);
+        String message = Utils.validate("plan_schema",plan);
+
+        ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
+        modelAndView.addObject("message", message);
+        if (message.equals("success")){
+            planServices.save(plan);
+            return modelAndView;
+        }else {
+            modelAndView.setViewName("redirect:/plan/error");
+            return modelAndView;
+        }
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") String id) {
         planServices.remove(id);
+    }
+
+    @RequestMapping("/error")
+    public String error(String message) {
+        return "The post has some error: " + message;
+    }
+
+    @RequestMapping("/success")
+    public String success(String message) {
+        return message;
     }
 
 }
