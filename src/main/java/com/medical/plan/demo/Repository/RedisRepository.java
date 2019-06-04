@@ -11,7 +11,5 @@ public interface RedisRepository<String,Object> {
 
     Object save(Object plan);
 
-    Object update(Object plan);
-
     void removeOne(String id);
 }
