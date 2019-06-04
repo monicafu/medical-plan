@@ -14,8 +14,8 @@ Validate against json schemas
 Then store into key value store
 
 APIs:
-POST plan/add
-GET plan/all
-GET plan/{id}  
-DELETE /plan/{id}
+<br>POST plan/add
+<br>GET plan/all
+<br>GET plan/{id}  
+<br>DELETE /plan/{id}
 
