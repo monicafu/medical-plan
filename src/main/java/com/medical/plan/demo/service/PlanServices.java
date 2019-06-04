@@ -5,9 +5,9 @@ import java.util.Map;
 public interface PlanServices {
     Map<String,Map> findAll();
 
-    Map findById(String id);
+    Map<String,Map> findById(String id);
 
-    Map save(Map map);
+    Map<String,Map> save(Map map);
 
     void remove(String id);
 }

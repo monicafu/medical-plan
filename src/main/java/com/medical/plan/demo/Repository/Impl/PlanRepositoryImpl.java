@@ -23,19 +23,19 @@ public class PlanRepositoryImpl implements PlanRepository {
     }
 
     @Override
-    public Map findById(String id) {
+    public Map<String,Map> findById(String id) {
         return (Map)hashOperations.get("PLAN",id);
 
     }
 
     @Override
-    public Map save(Map plan) {
+    public Map<String,Map> save(Map plan) {
         hashOperations.put("PLAN",plan.get("objectId"),plan);
         return plan;
     }
 
     @Override
-    public Map update(Map plan) {
+    public Map<String,Map> update(Map plan) {
         return save(plan);
     }
 

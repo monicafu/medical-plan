@@ -25,7 +25,7 @@ public class PlanServicesImpl implements PlanServices {
     public Map save(Map plan) {
         return planRepository.save(plan);
     }
-    
+
     @Override
     public void remove(String id) {
         planRepository.removeOne(id);
