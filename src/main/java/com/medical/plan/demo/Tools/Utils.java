@@ -27,7 +27,7 @@ public class Utils {
             System.out.println(e.getMessage());
             return e.getMessage();
         }
-        return "success";
+        return "success, the objectId is " + ((Map) payload).get("objectId") ;
     }
 
     public static Map convertStrToMap(String jsonStr) {

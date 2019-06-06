@@ -39,7 +39,7 @@ public class PlanResource {
 
         ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
         modelAndView.addObject("message", message);
-        if (message.equals("success")){
+        if (message.startsWith("success")){
             planServices.save(plan);
             return modelAndView;
         }else {
