@@ -1,6 +1,7 @@
 package com.medical.plan.demo.service.Impl;
 
 import com.medical.plan.demo.Repository.PlanRepository;
+import com.medical.plan.demo.Tools.Utils;
 import com.medical.plan.demo.service.PlanServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,5 +30,17 @@ public class PlanServicesImpl implements PlanServices {
     @Override
     public void remove(String id) {
         planRepository.removeOne(id);
+    }
+
+    @Override
+    public Map patch(Map plan) {
+        planRepository.patch(plan);
+        return findById(Utils.getIndex(plan));
+    }
+
+    @Override
+    public Map put(Map plan) {
+        planRepository.put(plan);
+        return findById(Utils.getIndex(plan));
     }
 }

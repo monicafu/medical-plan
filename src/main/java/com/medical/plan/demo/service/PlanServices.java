@@ -10,4 +10,8 @@ public interface PlanServices {
     Map save(Map map);
 
     void remove(String id);
+
+    Map patch(Map plan);
+
+    Map put(Map plan);
 }

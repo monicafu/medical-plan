@@ -27,6 +27,7 @@ public class PlanResource {
 
     @GetMapping("/{id}")
     public Map findById(@PathVariable("id") String id) {
+        System.out.println(id);
         return planServices.findById(id);
     }
 
@@ -41,6 +42,32 @@ public class PlanResource {
         modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.save(plan);
+            return modelAndView;
+        }else {
+            modelAndView.setViewName("redirect:/plan/error");
+            return modelAndView;
+        }
+    }
+
+    @PatchMapping("/add")
+    public ModelAndView patch(@RequestBody String planJson) {
+        Map plan = Utils.convertStrToMap(planJson);
+
+        ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
+        planServices.patch(plan);
+        //modelAndView.addObject(planServices.patch(plan));
+        return modelAndView;
+    }
+
+    @PutMapping("/add")
+    public ModelAndView put(@RequestBody String planJson) {
+        Map plan = Utils.convertStrToMap(planJson);
+        String message = Utils.validate("plan_schema",plan);
+
+        ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
+        modelAndView.addObject("message", message);
+        if (message.startsWith("success")){
+            planServices.put(plan);
             return modelAndView;
         }else {
             modelAndView.setViewName("redirect:/plan/error");
