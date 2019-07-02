@@ -38,16 +38,33 @@ public class PlanRepositoryImpl implements PlanRepository {
 
         Map<String, Object> res = new HashMap<String, Object>();
 
+
+
+        List<String> listPropertyKeyList = getAllListProperties(schema, simpleProperties.get("objectType"));
+        List<String> objectPropertyKeyList = getAllObjectProperties(schema, simpleProperties.get("objectType"));
+        Map<String, String> simplePropertyType = getAllSimpleProperties(schema, simpleProperties.get("objectType"));
+
         for(String key : simpleProperties.keySet()) {
-            res.put(key, simpleProperties.get(key));
+            if(simplePropertyType.get(key).equals("integer")) {
+                res.put(key, Integer.valueOf(simpleProperties.get(key)));
+            } else {
+                res.put(key, simpleProperties.get(key));
+            }
+
         }
 
-        List<String> objectPropertyKeyList = getAllObjectProperties(schema, simpleProperties.get("objectType"));
-
-        for(String objectPropertyKey : objectPropertyKeyList) {
+        for(String objectPropertyKey : listPropertyKeyList) {
             List<Object> list = findSourceNode(Utils.getIndex(simpleProperties) + "_" +objectPropertyKey);
             if(!list.isEmpty()){
                 res.put(objectPropertyKey, list);
+            }
+        }
+
+        //Because the return list of the object property only have one element
+        for(String objectPropertyKey : objectPropertyKeyList) {
+            List<Object> list = findSourceNode(Utils.getIndex(simpleProperties) + "_" +objectPropertyKey);
+            if(!list.isEmpty()){
+                res.put(objectPropertyKey, list.get(0));
             }
         }
 
@@ -65,18 +82,46 @@ public class PlanRepositoryImpl implements PlanRepository {
         return res;
     }
 
-    private  List<String> getAllObjectProperties(JSONObject Schema, String objectType) {
+    private  List<String> getAllListProperties(JSONObject Schema, String objectType) {
         JSONObject properties = (JSONObject)((JSONObject)((JSONObject)((JSONObject)Schema.get("definitions")).get(objectType)).get("properties"));
         List<String> res = new ArrayList<String>();
         for(String key : properties.keySet()) {
             JSONObject property = (JSONObject) properties.get(key);
-            if(!property.has("type") || property.get("type").equals("array")) {
+            if(property.has("type") && property.get("type").equals("array")) {
                 res.add(key);
             }
         }
 
         return res;
     }
+
+    private  Map<String, String> getAllSimpleProperties(JSONObject Schema, String objectType) {
+        JSONObject properties = (JSONObject)((JSONObject)((JSONObject)((JSONObject)Schema.get("definitions")).get(objectType)).get("properties"));
+        Map<String, String> res = new HashMap<String, String>();
+        for(String key : properties.keySet()) {
+            JSONObject property = (JSONObject) properties.get(key);
+            if(property.has("type") && !property.get("type").equals("array") && !property.get("type").equals("object")) {
+                res.put(key, (String)property.get("type"));
+            }
+        }
+
+        return res;
+    }
+
+    private  List<String> getAllObjectProperties(JSONObject Schema, String objectType) {
+        JSONObject properties = (JSONObject)((JSONObject)((JSONObject)((JSONObject)Schema.get("definitions")).get(objectType)).get("properties"));
+        List<String> res = new ArrayList<String>();
+        for(String key : properties.keySet()) {
+            JSONObject property = (JSONObject) properties.get(key);
+            if(!property.has("type") || property.get("type").equals("object")) {
+                res.add(key);
+            }
+        }
+
+        return res;
+    }
+
+
 
 //    @Override
 //    public Map save(Map plan) {
@@ -130,10 +175,10 @@ public class PlanRepositoryImpl implements PlanRepository {
     @Override
     public void removeOne(String id) {
         Map<String, String> simpleProperties = jedis.hgetAll(id);
+        List<String> listPropertyKeyList = getAllListProperties(schema, simpleProperties.get("objectType"));
+        listPropertyKeyList.addAll(getAllObjectProperties(schema, simpleProperties.get("objectType")));
 
-        List<String> objectPropertyKeyList = getAllObjectProperties(schema, simpleProperties.get("objectType"));
-
-        for(String objectPropertyKey : objectPropertyKeyList) {
+        for(String objectPropertyKey : listPropertyKeyList) {
             List<Object> list = findSourceNode(Utils.getIndex(simpleProperties) + "_" +objectPropertyKey);
             for(Object sourceNode : list) {
                 removeOne(Utils.getIndex((Map)sourceNode));
