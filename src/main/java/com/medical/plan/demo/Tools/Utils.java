@@ -130,8 +130,10 @@ public class Utils {
             }
         } catch (java.text.ParseException e) {
             e.printStackTrace();
+            return false;
         } catch (JOSEException e) {
             e.printStackTrace();
+            return false;
         }
 
         return true;
