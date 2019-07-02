@@ -1,5 +1,10 @@
 package com.medical.plan.demo.Tools;
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.*;
+import com.nimbusds.jose.jwk.*;
+import com.nimbusds.jose.jwk.gen.*;
+import com.nimbusds.jwt.*;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -14,6 +19,17 @@ import java.util.*;
 
 public class Utils {
     private static Jedis jedis = new Jedis("127.0.0.1",6379);
+    private static RSAKey rsaJWK;
+
+    static {
+        try {
+            rsaJWK = new RSAKeyGenerator(2048).generate();
+        } catch (JOSEException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static RSAKey rsaPublicJWK = rsaJWK.toPublicJWK();
 
     public static JSONObject getSchema(String schemaName) {
         JSONObject schema = null;
@@ -44,7 +60,7 @@ public class Utils {
             System.out.println(e.getMessage());
             return e.getMessage();
         }
-        return "success, the objectId is " + ((Map) payload).get("objectId") ;
+        return "success, the objectId is " + Utils.getIndex((Map) payload) ;
     }
 
     public static Map convertStrToMap(String jsonStr) {
@@ -60,156 +76,64 @@ public class Utils {
         return jsonObject;
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JOSEException {
         //Map val = Utils.convertStrToMap("{\"planCostShares\": { \"deductible\": 2000, \"_org\": \"example.com\", \"copay\": 23, \"objectId\": \"1234vxc2324sdf-501\", \"objectType\": \"membercostshare\" }, \"linkedPlanServices\": [{ \"linkedService\": { \"_org\": \"example.com\", \"objectId\": \"1234520xvc30asdf-502\", \"objectType\": \"service\", \"name\": \"Yearly physical\" }, \"planserviceCostShares\": { \"deductible\": 10, \"_org\": \"example.com\", \"copay\": 0, \"objectId\": \"1234512xvc1314asdfs-503\", \"objectType\": \"membercostshare\" }, \"_org\": \"example.com\", \"objectId\": \"27283xvx9asdff-504\", \"objectType\": \"planservice\" }, { \"linkedService\": { \"_org\": \"example.com\", \"objectId\": \"1234520xvc30sfs-505\", \"objectType\": \"service\", \"name\": \"well baby\" }, \"planserviceCostShares\": { \"deductible\": 10, \"_org\": \"example.com\", \"copay\": 175, \"objectId\": \"1234512xvc1314sdfsd-506\", \"objectType\": \"membercostshare\" }, \"_org\": \"example.com\", \"objectId\": \"27283xvx9sdf-507\", \"objectType\": \"planservice\" } ], \"_org\": \"example.com\", \"objectId\": \"12xvxc345ssdsds-508\", \"objectType\": \"plan\", \"planType\": \"inNetwork\", \"creationDate\": \"12-12-2017\" }");
         //Utils.validate("plan_schema", val);
         //Utils.test();
-        SchemaTest();
-    }
-
-    public static void test() {
-        String input = "{"+
-                "\"planCostShares\": {"+
-                "\"deductible\": 3000,"+
-                "\"_org\": \"example.com\","+
-                "\"copay\": 23,"+
-                "\"objectId\": \"1234vxc2324sdf-501\","+
-                "\"objectType\": \"membercostshare\""+
-                "},"+
-                "\"_org\": \"example.com\","+
-                "\"objectId\": \"12xvxc345ssdsds-508\","+
-                "\"objectType\": \"plan\","+
-                "\"planType\": \"inNetwork\","+
-                "\"creationDate\": \"12-12-2017\""+
-                "}";
-
-        Map jsonObject = convertStrToMap(input);
-
-        //createIndex(jsonObject, "");
-        patch(convertStrToMap(input));
-    }
-
-    public static void createIndex(Map map, String prefix) {
-        Map<String, String> pair = new HashMap<String, String>();
-        prefix += (prefix.isEmpty()?"":"_") + getIndex(map);
-        for(Object key : map.keySet()) {
-            Object value = map.get(key);
-            if(value instanceof List) {
-                saveObjectJson(prefix +"_"+ (String)key, (List)value);
-                //pair.put((String)key,  prefix +"_"+ (String)key);
-            } else if(value instanceof Map){
-                System.out.println(value);
-            }else {
-                pair.put((String)key, String.valueOf(value));
-            }
-        }
-
-        saveSimpleJson(pair);
-    }
-
-    private static void saveObjectJson(String key, List list) {
-        for(Object object:list) {
-            createIndex((Map)object, "");
-            jedis.sadd(key, getIndex((Map)object));
-        }
-    }
-
-    private static void saveSimpleJson(Map<String, String> map) {
-        jedis.hmset(getIndex(map), map);
+        //SchemaTest();
+        String str = createJWT();
+        System.out.println(str);
+        System.out.println(verifyJWT(str));
     }
 
     public static String getIndex(Map<String, String> map) {
         return map.get("objectType") + "_" + map.get("objectId");
     }
 
-    private static Map<String, Object> findById(String id, JSONObject schema) {
-        Map<String, String> simpleProperties = jedis.hgetAll(id);
+    public static String createJWT() throws JOSEException {
+        JWSSigner signer = new RSASSASigner(rsaJWK);
 
-        Map<String, Object> res = new HashMap<String, Object>();
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(CONSTANTS.JWT_SUBJECT)
+                .issuer(CONSTANTS.JWT_ISSUER)
+                .expirationTime(new Date(new Date().getTime() + 3600 * 1000))
+                .build();
 
-        for(String key : simpleProperties.keySet()) {
-            res.put(key, simpleProperties.get(key));
-        }
+        SignedJWT signedJWT = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaJWK.getKeyID()).build(),
+                claimsSet);
 
-        List<String> objectPropertyKeyList = getAllObjectProperties(schema, simpleProperties.get("objectType"));
+        signedJWT.sign(signer);
 
-        for(String objectPropertyKey : objectPropertyKeyList) {
-            List<Object> list = findSourceNode(getIndex(simpleProperties) + "_" +objectPropertyKey, schema);
-            if(!list.isEmpty());
-            res.put(objectPropertyKey, list);
-        }
+        String s = signedJWT.serialize();
 
-        return res;
+        return s;
     }
 
-    private static List<Object> findSourceNode(String edgeKey, JSONObject schema) {
-        Set<String> list = jedis.smembers(edgeKey);
-        List<Object> res = new ArrayList<Object>();
-
-        for(String sourceNode : list) {
-            res.add(findById(sourceNode, schema));
-        }
-
-        return res;
-    }
-
-    public static void SchemaTest() {
-        String schema_src = "src/main/java/com/medical/plan/demo/Repository/JsonSchema/plan_schema2.json";
+    public static boolean verifyJWT(String jwt) {
+        SignedJWT signedJWT = null;
         try {
-            InputStreamReader standard = new InputStreamReader(new FileInputStream(new File(schema_src)));
+            signedJWT = SignedJWT.parse(jwt);
 
-            JSONObject schema = new JSONObject(new JSONTokener(standard));
-            System.out.println(findById("plan_12xvxc345ssdsds-508", schema));
-            delete("plan_12xvxc345ssdsds-508", schema);
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+            JWSVerifier verifier = new RSASSAVerifier(rsaPublicJWK);
 
-    }
-
-    public static List<String> getAllObjectProperties(JSONObject Schema, String objectType) {
-        JSONObject properties = (JSONObject)((JSONObject)((JSONObject)((JSONObject)Schema.get("definitions")).get(objectType)).get("properties"));
-        List<String> res = new ArrayList<String>();
-        for(String key : properties.keySet()) {
-            JSONObject property = (JSONObject) properties.get(key);
-            if(!property.has("type") || property.get("type").equals("array")) {
-                res.add(key);
+            if(!signedJWT.verify(verifier)) {
+                return false;
             }
-        }
 
-        return res;
-    }
-
-    public static void patch(Map map) {
-        String index = getIndex(map);
-        for(Object key : map.keySet()) {
-            Object value = map.get(key);
-
-            if(value instanceof List) {
-                for(Object o : (List)value) {
-                    patch((Map)o);
-                }
-            } else if(value instanceof Map) {
-                    patch((Map)value);
-            } else {
-                jedis.hset(index, (String)key, String.valueOf(value));
+            if(!signedJWT.getJWTClaimsSet().getSubject().equals(CONSTANTS.JWT_SUBJECT)) {
+                return false;
             }
-        }
-    }
 
-    public static void delete(String id, JSONObject schema) {
-        Map<String, String> simpleProperties = jedis.hgetAll(id);
-
-        List<String> objectPropertyKeyList = getAllObjectProperties(schema, simpleProperties.get("objectType"));
-
-        for(String objectPropertyKey : objectPropertyKeyList) {
-            List<Object> list = findSourceNode(getIndex(simpleProperties) + "_" +objectPropertyKey, schema);
-            for(Object sourceNode : list) {
-                delete(getIndex((Map)sourceNode), schema);
+            if(!signedJWT.getJWTClaimsSet().getIssuer().equals(CONSTANTS.JWT_ISSUER)) {
+                return false;
             }
-            jedis.del(getIndex(simpleProperties) + "_" +objectPropertyKey);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        } catch (JOSEException e) {
+            e.printStackTrace();
         }
 
-        jedis.del(id);
+        return true;
     }
 }

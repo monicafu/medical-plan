@@ -46,8 +46,9 @@ public class PlanRepositoryImpl implements PlanRepository {
 
         for(String objectPropertyKey : objectPropertyKeyList) {
             List<Object> list = findSourceNode(Utils.getIndex(simpleProperties) + "_" +objectPropertyKey);
-            if(!list.isEmpty());
-            res.put(objectPropertyKey, list);
+            if(!list.isEmpty()){
+                res.put(objectPropertyKey, list);
+            }
         }
 
         return res;

@@ -11,7 +11,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/plan")
+@RequestMapping("/plans")
 public class PlanResource {
     @Autowired
     private PlanServices planServices;
@@ -20,57 +20,54 @@ public class PlanResource {
     }
 
 
-    @GetMapping("/all")
+    @GetMapping("/")
     public Map<String,Map> findAll() {
         return planServices.findAll();
     }
 
     @GetMapping("/{id}")
     public Map findById(@PathVariable("id") String id) {
-        System.out.println(id);
         return planServices.findById(id);
     }
 
-    @PostMapping("/add")
+    @PostMapping("/")
     public ModelAndView add(@RequestBody String planJson) {
 
         //validate schema
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
+        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
         modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.save(plan);
             return modelAndView;
         }else {
-            modelAndView.setViewName("redirect:/plan/error");
+            modelAndView.setViewName("redirect:/plans/error");
             return modelAndView;
         }
     }
 
-    @PatchMapping("/add")
-    public ModelAndView patch(@RequestBody String planJson) {
+    @PatchMapping("/{id}")
+    public String patch(@RequestBody String planJson) {
         Map plan = Utils.convertStrToMap(planJson);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
         planServices.patch(plan);
-        //modelAndView.addObject(planServices.patch(plan));
-        return modelAndView;
+        return "success, the objectId is " + Utils.getIndex(plan) ;
     }
 
-    @PutMapping("/add")
+    @PutMapping("/{id}")
     public ModelAndView put(@RequestBody String planJson) {
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:/plan/success");
+        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
         modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.put(plan);
             return modelAndView;
         }else {
-            modelAndView.setViewName("redirect:/plan/error");
+            modelAndView.setViewName("redirect:/plans/error");
             return modelAndView;
         }
     }
