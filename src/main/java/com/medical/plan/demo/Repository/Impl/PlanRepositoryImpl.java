@@ -35,10 +35,11 @@ public class PlanRepositoryImpl implements PlanRepository {
     @Override
     public Map findById(String id) {
         Map<String, String> simpleProperties = jedis.hgetAll(id);
-
         Map<String, Object> res = new HashMap<String, Object>();
 
-
+        if(simpleProperties == null || simpleProperties.size() == 0) {
+            return null;
+        }
 
         List<String> listPropertyKeyList = getAllListProperties(schema, simpleProperties.get("objectType"));
         List<String> objectPropertyKeyList = getAllObjectProperties(schema, simpleProperties.get("objectType"));
@@ -133,6 +134,7 @@ public class PlanRepositoryImpl implements PlanRepository {
     @Override
     public Map save(Map plan) {
         createIndex(plan, "");
+        Utils.enQueue(plan);
         return plan;
     }
 
@@ -205,6 +207,8 @@ public class PlanRepositoryImpl implements PlanRepository {
                 jedis.hset(index, (String)key, String.valueOf(value));
             }
         }
+
+        Utils.enQueue(findById(index));
     }
 
     @Override
@@ -212,4 +216,5 @@ public class PlanRepositoryImpl implements PlanRepository {
         removeOne(Utils.getIndex(plan));
         save(plan);
     }
+
 }

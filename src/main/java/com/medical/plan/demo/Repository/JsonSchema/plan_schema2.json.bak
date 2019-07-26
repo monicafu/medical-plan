@@ -6,12 +6,12 @@
       "type": "object",
       "properties": {
         "planCostShares": {
-          "$ref": "#/definitions/planCostShares"
+          "$ref": "#/definitions/membercostshare"
         },
         "linkedPlanServices": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/linkedPlanService"
+            "$ref": "#/definitions/planservice"
           }
         },
         "_org": {"type": "string"},
@@ -28,14 +28,14 @@
       ],
       "title": "plan"
     },
-    "linkedPlanService": {
+    "planservice": {
       "type": "object",
       "properties" :{
         "linkedService": {
-          "$ref": "#/definitions/linkedService"
+          "$ref": "#/definitions/service"
         },
         "planserviceCostShares": {
-          "$ref": "#/definitions/planCostShares"
+          "$ref": "#/definitions/membercostshare"
         },
         "_org": {"type": "string"},
         "objectId": {"type": "string"},
@@ -45,9 +45,9 @@
         "objectId",
         "objectType"
       ],
-      "title": "linkedPlanService"
+      "title": "planservice"
     },
-    "linkedService": {
+    "service": {
       "type": "object",
       "properties": {
         "_org": {"type": "string"},
@@ -60,9 +60,9 @@
         "objectId",
         "objectType"
       ],
-      "title": "linkedService"
+      "title": "service"
     },
-    "planCostShares": {
+    "membercostshare": {
       "type": "object",
       "properties": {
         "deductible": {"type": "integer"},
@@ -77,7 +77,7 @@
         "objectId",
         "objectType"
       ],
-      "title": "planCostShares"
+      "title": "membercostshare"
     }
   }
 }

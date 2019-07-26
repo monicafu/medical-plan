@@ -6,6 +6,7 @@
       "type": "object",
       "properties": {
         "planCostShares": {
+	  "type": "object",
           "$ref": "#/definitions/membercostshare"
         },
         "linkedPlanServices": {

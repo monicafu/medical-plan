@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.gen.*;
 import com.nimbusds.jwt.*;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.simple.parser.JSONParser;
@@ -137,5 +138,9 @@ public class Utils {
         }
 
         return true;
+    }
+
+    public static void enQueue(Map map) {
+        jedis.rpush("source", map.toString());
     }
 }

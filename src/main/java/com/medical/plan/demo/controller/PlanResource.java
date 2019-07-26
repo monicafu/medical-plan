@@ -48,15 +48,30 @@ public class PlanResource {
         }
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/")
     public String patch(@RequestBody String planJson) {
         Map plan = Utils.convertStrToMap(planJson);
 
-        planServices.patch(plan);
-        return "success, the objectId is " + Utils.getIndex(plan) ;
+        String id = Utils.getIndex(plan);
+
+        Map searchRes = findById(id);
+        if(searchRes == null || searchRes.size() == 0) {
+
+            String message = Utils.validate("plan_schema",plan);
+            if (message.startsWith("success")){
+                planServices.save(plan);
+                return "not find this plan, success add, the objectId is " + Utils.getIndex(plan) ;
+            } else {
+                return "not find this plan, failure add because the object is not valid";
+            }
+
+        } else {
+            planServices.patch(plan);
+            return "success merge, the objectId is " + Utils.getIndex(plan) ;
+        }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/")
     public ModelAndView put(@RequestBody String planJson) {
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
