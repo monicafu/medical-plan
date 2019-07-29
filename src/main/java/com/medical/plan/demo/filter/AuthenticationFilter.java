@@ -2,20 +2,15 @@ package com.medical.plan.demo.filter;
 
 
 import com.medical.plan.demo.Tools.Utils;
-import com.nimbusds.jose.JOSEException;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpStatus;
 
 import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 
 @Order(1)
 public class AuthenticationFilter implements Filter {
@@ -23,6 +18,7 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+
         String auth = ((HttpServletRequest)servletRequest).getHeader("Authorization");
 
         if (auth == null || !auth.startsWith("Bearer ")) {
@@ -49,6 +45,7 @@ public class AuthenticationFilter implements Filter {
         }
         writer = new PrintWriter(osw, true);
         writer.write("Authentication Fail");
+        response.setStatus(403);
         writer.flush();
         writer.close();
     }

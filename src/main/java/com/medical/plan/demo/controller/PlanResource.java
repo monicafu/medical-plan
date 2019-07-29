@@ -4,8 +4,9 @@ import com.medical.plan.demo.Tools.Utils;
 import com.medical.plan.demo.service.PlanServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
 
@@ -26,80 +27,90 @@ public class PlanResource {
     }
 
     @GetMapping("/{id}")
-    public Map findById(@PathVariable("id") String id) {
-        return planServices.findById(id);
+    public ResponseEntity<?> findById(@PathVariable("id") String id) {
+        Map res = findByIds(id);
+        return new ResponseEntity<Object>(res,HttpStatus.OK);
     }
 
     @PostMapping("/")
-    public ModelAndView add(@RequestBody String planJson) {
+    public ResponseEntity<?> add(@RequestBody String planJson) {
 
         //validate schema
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
-        modelAndView.addObject("message", message);
+//        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
+//        modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.save(plan);
-            return modelAndView;
+            return new ResponseEntity<Object>(message,HttpStatus.OK);
         }else {
-            modelAndView.setViewName("redirect:/plans/error");
-            return modelAndView;
+//            modelAndView.setViewName("redirect:/plans/error");
+            return new ResponseEntity<Object>(message,HttpStatus.FORBIDDEN);
         }
     }
 
     @PatchMapping("/")
-    public String patch(@RequestBody String planJson) {
+    public ResponseEntity<?> patch(@RequestBody String planJson) {
         Map plan = Utils.convertStrToMap(planJson);
 
         String id = Utils.getIndex(plan);
 
-        Map searchRes = findById(id);
+        Map searchRes =  findByIds(id);
+        String res = "";
         if(searchRes == null || searchRes.size() == 0) {
 
             String message = Utils.validate("plan_schema",plan);
             if (message.startsWith("success")){
                 planServices.save(plan);
-                return "not find this plan, success add, the objectId is " + Utils.getIndex(plan) ;
+                res = "Can't find this plan, success add, the objectId is " + Utils.getIndex(plan);
+                return new ResponseEntity<Object>(res, HttpStatus.OK);
             } else {
-                return "not find this plan, failure add because the object is not valid";
+                res = "Can't find this plan, failure add because the object is not valid";
+                return new ResponseEntity<Object>(res,HttpStatus.EXPECTATION_FAILED);
             }
 
         } else {
             planServices.patch(plan);
-            return "success merge, the objectId is " + Utils.getIndex(plan) ;
+            res = "Success merge, the objectId is " + Utils.getIndex(plan);
+            return new ResponseEntity<Object>(res,HttpStatus.OK);
         }
     }
 
     @PutMapping("/")
-    public ModelAndView put(@RequestBody String planJson) {
+    public ResponseEntity<?> put(@RequestBody String planJson) {
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
 
-        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
-        modelAndView.addObject("message", message);
+//        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
+//        modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.put(plan);
-            return modelAndView;
+            return new ResponseEntity<Object>(message,HttpStatus.OK);
         }else {
-            modelAndView.setViewName("redirect:/plans/error");
-            return modelAndView;
+//            modelAndView.setViewName("redirect:/plans/error");
+            return new ResponseEntity<Object>(message,HttpStatus.FORBIDDEN);
         }
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") String id) {
+    public ResponseEntity<?> delete(@PathVariable("id") String id) {
         planServices.remove(id);
+        return new ResponseEntity<Object>(null,HttpStatus.OK);
     }
 
-    @RequestMapping("/error")
-    public String error(String message) {
-        return "The post has some error: " + message;
-    }
+//    @RequestMapping("/error")
+//    public String error(String message) {
+//        return "The post has some error: " + message;
+//    }
+//
+//    @RequestMapping("/success")
+//    public String success(String message) {
+//        return message;
+//    }
 
-    @RequestMapping("/success")
-    public String success(String message) {
-        return message;
+    private Map findByIds(String id) {
+        return planServices.findById(id);
     }
 
 }
