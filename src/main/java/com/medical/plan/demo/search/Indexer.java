@@ -40,7 +40,7 @@ public class Indexer {
         System.out.println(plan.toString());
         String id = Utils.getIndex(plan);
         System.out.println(plan.toString());
-        IndexRequest indexRequest = new IndexRequest("planindex").type("plans")
+        IndexRequest indexRequest = new IndexRequest("plan_index").type("plans")
                 .id(id).source(plan);
         return client.index(indexRequest, RequestOptions.DEFAULT);
     }
