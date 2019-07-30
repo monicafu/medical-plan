@@ -39,13 +39,10 @@ public class PlanResource {
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
 
-//        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
-//        modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.save(plan);
             return new ResponseEntity<Object>(message,HttpStatus.OK);
         }else {
-//            modelAndView.setViewName("redirect:/plans/error");
             return new ResponseEntity<Object>(message,HttpStatus.FORBIDDEN);
         }
     }
@@ -71,7 +68,7 @@ public class PlanResource {
             }
 
         } else {
-            planServices.patch(plan);
+            planServices.patch(plan, searchRes);
             res = "Success merge, the objectId is " + Utils.getIndex(plan);
             return new ResponseEntity<Object>(res,HttpStatus.OK);
         }
@@ -82,13 +79,10 @@ public class PlanResource {
         Map plan = Utils.convertStrToMap(planJson);
         String message = Utils.validate("plan_schema",plan);
 
-//        ModelAndView modelAndView = new ModelAndView("redirect:/plans/success");
-//        modelAndView.addObject("message", message);
         if (message.startsWith("success")){
             planServices.put(plan);
             return new ResponseEntity<Object>(message,HttpStatus.OK);
         }else {
-//            modelAndView.setViewName("redirect:/plans/error");
             return new ResponseEntity<Object>(message,HttpStatus.FORBIDDEN);
         }
     }
@@ -98,16 +92,6 @@ public class PlanResource {
         planServices.remove(id);
         return new ResponseEntity<Object>(null,HttpStatus.OK);
     }
-
-//    @RequestMapping("/error")
-//    public String error(String message) {
-//        return "The post has some error: " + message;
-//    }
-//
-//    @RequestMapping("/success")
-//    public String success(String message) {
-//        return message;
-//    }
 
     private Map findByIds(String id) {
         return planServices.findById(id);

@@ -37,6 +37,7 @@ public class Indexer {
 
 
     private IndexResponse putInES(Map plan) throws IOException {
+        System.out.println(plan.toString());
         String id = Utils.getIndex(plan);
         System.out.println(plan.toString());
         IndexRequest indexRequest = new IndexRequest("planindex").type("plans")

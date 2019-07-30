@@ -212,6 +212,75 @@ public class PlanRepositoryImpl implements PlanRepository {
     }
 
     @Override
+    public void patch(Map source, Map target) {
+        Map plan = patchHelper(source, target, new HashMap<>());
+        save(plan);
+    }
+
+    private Map patchHelper(Map source, Map target, Map map) {
+        if( (source == null && target == null) || (source.size() == 0 && target.size() == 0)) {
+            return map;
+        }
+
+        Set<Object> keySet = new HashSet<Object>();
+
+        keySet.addAll(source.keySet());
+        keySet.addAll(target.keySet());
+
+        for(Object key : keySet) {
+            System.out.println(String.valueOf(key));
+            if(!target.containsKey(key)) {
+                map.put(key, source.get(key));
+            } else if(!source.containsKey(key)){
+                map.put(key, target.get(key));
+            } else if(target.get(key) instanceof Map){
+                if(target.get(key) instanceof  Map) {
+                    map.put(key, new HashMap<>());
+                    patchHelper((Map)source.get(key), (Map)target.get(key), (Map)map.get(key));
+                } else {
+                    map.put(key, source.get(key));
+                }
+            } else if(target.get(key) instanceof List) {
+                List<Object> list = new ArrayList<>();
+                map.put(key, list);
+
+                Map sourceMap = new HashMap<>();
+                Map targetMap = new HashMap<>();
+                Map mergeMap = new HashMap<>();
+                for(Object object : (List)target.get(key)) {
+                    String index = Utils.getIndex((Map)object);
+                    targetMap.put(index, object);
+                }
+
+                for(Object object : (List)source.get(key)) {
+                    String index = Utils.getIndex((Map)object);
+                    sourceMap.put(index, object);
+                }
+
+                for(Object sourceKey : sourceMap.keySet()) {
+                    if(targetMap.containsKey(sourceKey)) {
+                        mergeMap.put(sourceKey, patchHelper((Map)sourceMap.get(sourceKey), (Map)targetMap.get(sourceKey), new HashMap<>()));
+                    } else {
+                        mergeMap.put(sourceKey, sourceMap.get(sourceKey));
+                    }
+                }
+
+                for(Object targetKey : targetMap.keySet()) {
+                    if(!mergeMap.containsKey(targetKey)) {
+                        mergeMap.put(targetKey, targetMap.get(targetKey));
+                    }
+                }
+
+                list.addAll(mergeMap.values());
+            } else {
+                map.put(key, source.get(key));
+            }
+        }
+
+        return map;
+    }
+
+    @Override
     public void put(Map plan) {
         removeOne(Utils.getIndex(plan));
         save(plan);

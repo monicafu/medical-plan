@@ -13,5 +13,7 @@ public interface PlanServices {
 
     Map patch(Map plan);
 
+    Map patch(Map source, Map target);
+
     Map put(Map plan);
 }

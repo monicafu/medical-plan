@@ -141,6 +141,8 @@ public class Utils {
     }
 
     public static void enQueue(Map map) {
-        jedis.rpush("source", map.toString());
+        //convertStrToMap(map.toString());
+        //System.out.println();
+        jedis.rpush("source", JSONObject.valueToString(map));
     }
 }

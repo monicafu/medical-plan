@@ -39,6 +39,12 @@ public class PlanServicesImpl implements PlanServices {
     }
 
     @Override
+    public Map patch(Map source, Map target) {
+        planRepository.patch(source, target);
+        return findById(Utils.getIndex(target));
+    }
+
+    @Override
     public Map put(Map plan) {
         planRepository.put(plan);
         return findById(Utils.getIndex(plan));

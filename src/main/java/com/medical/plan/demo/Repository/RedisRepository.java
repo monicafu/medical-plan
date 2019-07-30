@@ -15,5 +15,7 @@ public interface RedisRepository<String,Object> {
 
     void patch(Object plan);
 
+    void patch(Object source, Object target);
+
     void put(Object plan);
 }
